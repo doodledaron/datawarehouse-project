@@ -1,79 +1,75 @@
--- =====================================================
--- 📌 BULK INSERT INTO TABLES FROM CSV (PostgreSQL)
--- =====================================================
+-- ==========================================
+-- 🚀 Stored Procedure: import_crm_data
+-- Purpose: Bulk import multiple CSV files into their corresponding tables
+-- Requirements:
+--   ✅ All CSV files must be stored on the PostgreSQL server's file system
+--   ❌ This will NOT work if the files are on your local machine (e.g., Mac) and you're using COPY
+--   ✅ File paths must be absolute and accessible by the PostgreSQL server process
+-- ==========================================
 
--- ✅ METHOD 1: Using psql CLI
--- Run this script in terminal with:
---    psql -U postgres -d DataWarehouse -f import_data.sql
--- Make sure the file paths below point to your LOCAL machine.
--- =====================================================
+CREATE OR REPLACE PROCEDURE bronze.import_crm_data()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    -- 📁 Import CRM Customer Information
+    -- File: cust_info.csv must exist in server directory: /Library/PostgreSQL/17/data/csvs/
+    COPY bronze.crm_cust_info
+    FROM '/Library/PostgreSQL/17/data/csvs/cust_info.csv'
+    WITH (
+        FORMAT csv,       -- File format
+        HEADER true,      -- Skip the header row
+        DELIMITER ','     -- Use comma as field separator
+    );
 
--- CRM Customer Info
-\COPY bronze.crm_cust_info
-FROM '/path/to/your/csvs/cust_info.csv'
-WITH (
-    FORMAT csv,       -- The file is in CSV format
-    HEADER true,      -- Skip header row
-    DELIMITER ','     -- Column separator
-);
+    -- 📁 Import CRM Product Information
+    COPY bronze.crm_prd_info
+    FROM '/Library/PostgreSQL/17/data/csvs/prd_info.csv'
+    WITH (
+        FORMAT csv,
+        HEADER true,
+        DELIMITER ','
+    );
 
--- CRM Product Info
-\COPY bronze.crm_prd_info
-FROM '/path/to/your/csvs/prd_info.csv'
-WITH (
-    FORMAT csv,
-    HEADER true,
-    DELIMITER ','
-);
+    -- 📁 Import CRM Sales Details
+    COPY bronze.crm_sales_details
+    FROM '/Library/PostgreSQL/17/data/csvs/sales_details.csv'
+    WITH (
+        FORMAT csv,
+        HEADER true,
+        DELIMITER ','
+    );
 
--- CRM Sales Details
-\COPY bronze.crm_sales_details
-FROM '/path/to/your/csvs/sales_details.csv'
-WITH (
-    FORMAT csv,
-    HEADER true,
-    DELIMITER ','
-);
+    -- 📁 Import ERP Customer AZ12
+    COPY bronze.erp_cust_az12
+    FROM '/Library/PostgreSQL/17/data/csvs/cust_az12.csv'
+    WITH (
+        FORMAT csv,
+        HEADER true,
+        DELIMITER ','
+    );
 
--- ERP Customer AZ12
-\COPY bronze.erp_cust_az12
-FROM '/path/to/your/csvs/cust_az12.csv'
-WITH (
-    FORMAT csv,
-    HEADER true,
-    DELIMITER ','
-);
+    -- 📁 Import ERP Location A101
+    COPY bronze.erp_loc_a101
+    FROM '/Library/PostgreSQL/17/data/csvs/loc_a101.csv'
+    WITH (
+        FORMAT csv,
+        HEADER true,
+        DELIMITER ','
+    );
 
--- ERP Location A101
-\COPY bronze.erp_loc_a101
-FROM '/path/to/your/csvs/loc_a101.csv'
-WITH (
-    FORMAT csv,
-    HEADER true,
-    DELIMITER ','
-);
+    -- 📁 Import ERP PX Category G1V2
+    COPY bronze.erp_px_cat_g1v2
+    FROM '/Library/PostgreSQL/17/data/csvs/px_cat_g1v2.csv'
+    WITH (
+        FORMAT csv,
+        HEADER true,
+        DELIMITER ','
+    );
+END;
+$$;
 
--- ERP PX Category G1V2
-\COPY bronze.erp_px_cat_g1v2
-FROM '/path/to/your/csvs/px_cat_g1v2.csv'
-WITH (
-    FORMAT csv,
-    HEADER true,
-    DELIMITER ','
-);
-
-
--- =====================================================
--- 🖥️ METHOD 2: Using pgAdmin GUI (no SQL needed)
--- =====================================================
--- 1. In pgAdmin, right-click on any target table (e.g. crm_cust_info)
--- 2. Select: Import/Export
--- 3. Choose:
---    - Filename: Browse to your .csv file
---    - Format: CSV
---    - Header: ✅ Check "Header"
---    - Delimiter: ,
--- 4. Click "OK" to load the data
--- Repeat this for each table and its respective file
--- =====================================================
-
+-- ==========================================
+-- 🟢 Execute the procedure
+-- Run this from pgAdmin Query Tool or psql CLI:
+CALL bronze.import_crm_data();
+-- ==========================================
