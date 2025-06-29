@@ -1,27 +1,29 @@
--- ==========================================
--- 🚀 Stored Procedure: import_crm_data
--- Purpose: Bulk import multiple CSV files into their corresponding tables
--- Requirements:
---   ✅ All CSV files must be stored on the PostgreSQL server's file system
---   ❌ This will NOT work if the files are on your local machine (e.g., Mac) and you're using COPY
---   ✅ File paths must be absolute and accessible by the PostgreSQL server process
--- ==========================================
+-- ================================================
+-- Procedure: bronze.load_bronze()
+-- Purpose: Import data from CSVs into bronze schema
+-- Action: Truncate before insert to ensure idempotency
+-- ================================================
 
-CREATE OR REPLACE PROCEDURE bronze.import_crm_data()
+CREATE OR REPLACE PROCEDURE bronze.load_bronze()
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    -- 📁 Import CRM Customer Information
-    -- File: cust_info.csv must exist in server directory: /Library/PostgreSQL/17/data/csvs/
+    -- ========================================
+    -- CRM Customer Information
+    -- ========================================
+    TRUNCATE TABLE bronze.crm_cust_info;
     COPY bronze.crm_cust_info
     FROM '/Library/PostgreSQL/17/data/csvs/cust_info.csv'
     WITH (
-        FORMAT csv,       -- File format
-        HEADER true,      -- Skip the header row
-        DELIMITER ','     -- Use comma as field separator
+        FORMAT csv,
+        HEADER true,
+        DELIMITER ','
     );
 
-    -- 📁 Import CRM Product Information
+    -- ========================================
+    -- CRM Product Information
+    -- ========================================
+    TRUNCATE TABLE bronze.crm_prd_info;
     COPY bronze.crm_prd_info
     FROM '/Library/PostgreSQL/17/data/csvs/prd_info.csv'
     WITH (
@@ -30,7 +32,10 @@ BEGIN
         DELIMITER ','
     );
 
-    -- 📁 Import CRM Sales Details
+    -- ========================================
+    -- CRM Sales Details
+    -- ========================================
+    TRUNCATE TABLE bronze.crm_sales_details;
     COPY bronze.crm_sales_details
     FROM '/Library/PostgreSQL/17/data/csvs/sales_details.csv'
     WITH (
@@ -39,7 +44,10 @@ BEGIN
         DELIMITER ','
     );
 
-    -- 📁 Import ERP Customer AZ12
+    -- ========================================
+    -- ERP Customer AZ12
+    -- ========================================
+    TRUNCATE TABLE bronze.erp_cust_az12;
     COPY bronze.erp_cust_az12
     FROM '/Library/PostgreSQL/17/data/csvs/cust_az12.csv'
     WITH (
@@ -48,7 +56,10 @@ BEGIN
         DELIMITER ','
     );
 
-    -- 📁 Import ERP Location A101
+    -- ========================================
+    -- ERP Location A101
+    -- ========================================
+    TRUNCATE TABLE bronze.erp_loc_a101;
     COPY bronze.erp_loc_a101
     FROM '/Library/PostgreSQL/17/data/csvs/loc_a101.csv'
     WITH (
@@ -57,7 +68,10 @@ BEGIN
         DELIMITER ','
     );
 
-    -- 📁 Import ERP PX Category G1V2
+    -- ========================================
+    -- ERP PX Category G1V2
+    -- ========================================
+    TRUNCATE TABLE bronze.erp_px_cat_g1v2;
     COPY bronze.erp_px_cat_g1v2
     FROM '/Library/PostgreSQL/17/data/csvs/px_cat_g1v2.csv'
     WITH (
@@ -67,9 +81,3 @@ BEGIN
     );
 END;
 $$;
-
--- ==========================================
--- 🟢 Execute the procedure
--- Run this from pgAdmin Query Tool or psql CLI:
-CALL bronze.import_crm_data();
--- ==========================================
